@@ -1,0 +1,54 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Chat with Flask-SocketIO</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.3/socket.io.js"></script>
+</head>
+<body>
+    <h1>Real-Time Chat with Flask-SocketIO</h1>
+    <ul id="chat"></ul>
+    <form id="message-form">
+        <input type="text" id="user-message" autocomplete="off" />
+        <button type="submit">Send</button>
+    </form>
+
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        socket.on('receive_message', function(data) {
+            var chat = document.getElementById('chat');
+            var listItem = document.createElement('li');
+            listItem.appendChild(document.createTextNode('User: ' + data.message));
+            chat.appendChild(listItem);
+
+            // Automatically scroll to the bottom of the chat
+            chat.scrollTop = chat.scrollHeight;
+
+            // Get a response from GPT when a message is received
+            socket.emit('send_message', { message: data.message });
+        });
+
+        document.getElementById('message-form').onsubmit = function(event) {
+            event.preventDefault();
+            var userMessage = document.getElementById('user-message').value;
+
+            var chat = document.getElementById('chat');
+            var listItem = document.createElement('li');
+            listItem.appendChild(document.createTextNode('You: ' + userMessage));
+            chat.appendChild(listItem);
+
+            // Automatically scroll to the bottom of the chat
+            chat.scrollTop = chat.scrollHeight;
+
+            // Emit the user's message to the server
+            socket.emit('send_message', { message: userMessage });
+
+            // Clear the input field
+            document.getElementById('user-message').value = '';
+        };
+    </script>
+</body>
+</html>

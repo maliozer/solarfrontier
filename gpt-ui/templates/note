@@ -1,0 +1,48 @@
+# Set your OpenAI GPT API key
+import openai
+import os
+
+OPENAI_API_KEY=os.getenv['YOURKEY']
+openai.api_key=OPENAI_API_KEY
+
+client = OpenAI(api_key = OPENAI_API_KEY)
+
+# Simple in-memory storage for chat messages
+chat_history = []
+
+@app.route('/')
+def index():
+    return render_template('index.html', chat_history=chat_history)
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    user_message = request.form['user_message']
+
+    # Add user's message to chat history
+    chat_history.append({'user': True, 'text': user_message})
+
+    # Use OpenAI GPT to generate a response
+    response = generate_gpt_response(user_message)
+
+    # Add GPT's response to chat history
+    chat_history.append({'user': False, 'text': response.choices[0].message.content})
+
+    return jsonify({'success': True})
+
+def generate_gpt_response(user_message):
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "system",
+                "content": "You will be provided with a block of text, and your task is to extract a list of keywords from it."
+            },
+            {
+                "role": "user",
+                "content": user_message
+            }
+        ],
+        max_tokens=64
+    )
+
+    return response

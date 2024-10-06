@@ -1,0 +1,37 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot with Flask</title>
+</head>
+<body>
+    <h1>Chatbot with Flask</h1>
+    <form method="POST" action="/get_response">
+        <label for="user_message">Your message:</label>
+        <input type="text" id="user_message" name="user_message" required>
+        <button type="submit">Send</button>
+    </form>
+    <div id="response"></div>
+    <script>
+        const form = document.querySelector('form');
+        const responseDiv = document.getElementById('response');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const userMessage = document.getElementById('user_message').value;
+            const response = await fetch('/get_response', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({ 'user_message': userMessage }),
+            });
+            const responseBody = await response.text();
+            responseDiv.innerHTML = `<p>${responseBody}</p>`;
+            document.getElementById('user_message').value = '';
+        });
+    </script>
+</body>
+</html>
